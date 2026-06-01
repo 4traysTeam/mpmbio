@@ -4,207 +4,443 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MPM Nganjuk</title>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Poppins:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    :root {
+      --pink-deep: #c2185b;
+      --pink-mid:  #e91e63;
+      --pink-soft: #f48fb1;
+      --pink-glow: #ff80ab;
+      --rose:      #ff4081;
     }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #ffe6f0, #ffd6e7);
-    }
-
-    .content {
-      flex: 1;
+      font-family: 'DM Sans', sans-serif;
+      background-color: #0a0008;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px 15px;
+      overflow-x: hidden;
+      position: relative;
     }
 
-    .profile-wrapper {
-      background: radial-gradient(circle, #ffe6f0, #ffd6e7, #ffffff);
-      padding: 30px;
+    /* ── BACKGROUND ORBS ── */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .orb1 {
+      position: absolute;
+      width: 520px; height: 520px;
       border-radius: 50%;
-      margin-top: 20px;
+      background: radial-gradient(circle at center,
+        rgba(233,30,99,0.55) 0%, rgba(194,24,91,0.25) 40%, transparent 72%);
+      top: -160px; left: -160px;
+      animation: drift1 14s ease-in-out infinite alternate;
+      filter: blur(2px);
+    }
+    .orb2 {
+      position: absolute;
+      width: 420px; height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center,
+        rgba(255,64,129,0.45) 0%, rgba(233,30,99,0.2) 45%, transparent 72%);
+      bottom: -120px; right: -120px;
+      animation: drift2 12s ease-in-out infinite alternate;
+      filter: blur(2px);
+    }
+    .orb3 {
+      position: absolute;
+      width: 340px; height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center,
+        rgba(255,128,171,0.3) 0%, rgba(233,30,99,0.1) 50%, transparent 72%);
+      top: 38%; left: 50%;
+      transform: translate(-50%,-50%);
+      animation: drift3 18s ease-in-out infinite alternate;
+      filter: blur(1px);
+    }
+    @keyframes drift1 { from{transform:translate(0,0) scale(1)} to{transform:translate(50px,70px) scale(1.12)} }
+    @keyframes drift2 { from{transform:translate(0,0) scale(1)} to{transform:translate(-45px,-55px) scale(1.1)} }
+    @keyframes drift3 { from{transform:translate(-50%,-50%) scale(1)} to{transform:translate(-50%,-50%) scale(1.25)} }
+
+    /* Noise */
+    .noise {
+      position: fixed; inset: 0; z-index: 1;
+      opacity: 0.035; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
     }
 
-    .profile-img {
-      width: 150px;
-      height: 150px;
-      border-radius: 50%;
-      border: 4px solid white;
-      object-fit: cover;
+    /* ── PAGE ── */
+    .page {
+      position: relative; z-index: 2;
+      width: 100%; max-width: 420px;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 54px 24px 44px;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex; flex-direction: column; align-items: center;
+      margin-bottom: 38px;
+      animation: fadeDown 0.7s ease both;
+    }
+    @keyframes fadeDown {
+      from { opacity:0; transform:translateY(-18px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── AVATAR — fixed layout ── */
+    .avatar-wrap {
+      position: relative;
+      width: 116px; height: 116px;
       cursor: pointer;
+      margin-bottom: 22px;
+      flex-shrink: 0;
+    }
+    /* spinning gradient ring */
+    .avatar-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(
+        var(--pink-mid), var(--pink-glow), var(--rose), var(--pink-deep), var(--pink-mid)
+      );
+      animation: spinRing 4s linear infinite;
+    }
+    /* dark gap between ring and image */
+    .avatar-gap {
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+      background: #0a0008;
+    }
+    /* image — explicit width+height, no inset shorthand */
+    .avatar-img {
+      position: absolute;
+      top: 6px; left: 6px;
+      width: calc(100% - 12px);
+      height: calc(100% - 12px);
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .avatar-wrap:hover .avatar-img { transform: scale(1.05); }
+    @keyframes spinRing {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
     }
 
-    h2 {
-      font-family: 'Poppins', sans-serif;
-      color: #e91e63;
-      font-size: 24px;
-      margin-top: 10px;
+    /* ── BRAND ── */
+    .brand-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px; font-weight: 800;
+      color: #fff; letter-spacing: -0.5px;
+      line-height: 1; text-transform: uppercase;
+      white-space: nowrap;
+      font-size: clamp(22px, 7vw, 32px);
     }
+    .brand-name span { color: var(--pink-mid); }
 
     .tagline {
       font-family: 'Caveat', cursive;
-      font-size: 20px;
-      color: #a83369;
-      margin: 10px 0 25px;
+      font-size: 20px; font-weight: 700;
+      color: var(--pink-soft);
+      margin-top: 10px; letter-spacing: 0.2px;
     }
 
-    .button {
-      width: 90%;
-      max-width: 300px;
-      margin: 8px 0;
-      padding: 12px 16px;
-      background-color: #ff66b2;
-      color: white;
-      text-align: left;
-      border-radius: 16px;
-      font-weight: bold;
-      text-decoration: none;
-      font-size: 16px;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 14px; padding: 5px 14px;
+      border-radius: 30px;
+      border: 1px solid rgba(255,128,171,0.3);
+      background: rgba(255,64,129,0.08);
+      font-size: 11px; font-weight: 500;
+      color: var(--pink-soft);
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .badge .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--pink-mid);
+      animation: pulse 1.6s ease infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.4; transform:scale(0.7); }
     }
 
-    .button img {
-      width: 24px;
-      height: 24px;
-    }
+    /* ── BUTTONS ── */
+    .links { width: 100%; display: flex; flex-direction: column; gap: 11px; }
 
-    .button:hover {
-      background-color: #ff4da6;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    .btn {
+      position: relative;
+      display: flex; align-items: center; gap: 14px;
+      width: 100%; padding: 14px 18px;
+      border-radius: 16px; text-decoration: none; color: #fff;
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+      overflow: hidden;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,128,171,0.15);
+      backdrop-filter: blur(10px);
+      transition: transform 0.2s ease, border-color 0.2s ease,
+                  background 0.2s ease, box-shadow 0.2s ease;
+      animation: fadeUp 0.6s ease both;
     }
-
-    .button:active {
-      transform: scale(0.96);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    .btn:nth-child(1){animation-delay:.08s}
+    .btn:nth-child(2){animation-delay:.16s}
+    .btn:nth-child(3){animation-delay:.24s}
+    .btn:nth-child(4){animation-delay:.32s}
+    .btn:nth-child(5){animation-delay:.40s}
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
     }
+    .btn::before {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.07) 50%, transparent 70%);
+      transform: translateX(-100%);
+      transition: transform 0.45s ease;
+    }
+    .btn:hover::before { transform: translateX(100%); }
+    .btn:hover {
+      background: rgba(255,64,129,0.1);
+      border-color: rgba(255,128,171,0.45);
+      box-shadow: 0 0 28px rgba(233,30,99,0.22), inset 0 1px 0 rgba(255,255,255,0.05);
+      transform: translateY(-2px);
+    }
+    .btn:active { transform: scale(0.97); }
 
+    /* icon box */
+    .btn-icon {
+      width: 40px; height: 40px; border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .btn-icon svg { width: 20px; height: 20px; fill: #fff; }
+
+    .btn-maps .btn-icon   { background: linear-gradient(135deg,#e91e63,#c2185b); }
+    .btn-ig .btn-icon     { background: linear-gradient(135deg,#f72585,#b5179e); }
+    .btn-tiktok .btn-icon { background: #111; border:1px solid rgba(255,255,255,0.12); }
+    .btn-fb .btn-icon     { background: linear-gradient(135deg,#1877f2,#0c5fb5); }
+    .btn-wa .btn-icon     { background: linear-gradient(135deg,#25d366,#128c7e); }
+
+    .btn-label { flex:1; }
+    .btn-label strong { display:block; font-weight:600; font-size:14px; color:#fff; }
+    .btn-label span   { font-size:11px; color:rgba(255,255,255,0.38); font-weight:400; }
+
+    .btn-arrow {
+      width:18px; height:18px; opacity:0.28; flex-shrink:0;
+      transition: opacity 0.2s, transform 0.2s;
+      fill: none; stroke: white; stroke-width: 2.5;
+    }
+    .btn:hover .btn-arrow { opacity:0.75; transform:translateX(3px); }
+
+    /* ── FOOTER ── */
     .footer {
-      text-align: center;
-      font-size: 12px;
-      color: #888;
-      padding: 15px 0;
+      margin-top: 42px; font-size:11px;
+      color:rgba(255,255,255,0.18); text-align:center; letter-spacing:0.4px;
     }
+    .footer a { color:var(--pink-soft); text-decoration:none; opacity:0.55; transition:opacity .2s; }
+    .footer a:hover { opacity:1; }
 
-    .footer a {
-      color: #00bfff;
-      text-decoration: none;
+    /* ── MUSIC PILL ── */
+    .music-bar {
+      display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+      z-index:10; background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,128,171,0.2); backdrop-filter:blur(12px);
+      border-radius:30px; padding:8px 18px; gap:8px;
+      align-items:center; font-size:11px; color:var(--pink-soft); white-space:nowrap;
     }
+    .music-bar.visible { display:flex; }
+    .bars { display:flex; gap:2px; align-items:flex-end; height:14px; }
+    .bars span {
+      display:block; width:3px; border-radius:2px; background:var(--pink-mid);
+      animation: bar .6s ease infinite alternate;
+    }
+    .bars span:nth-child(2){animation-delay:.15s}
+    .bars span:nth-child(3){animation-delay:.30s}
+    .bars span:nth-child(4){animation-delay:.10s}
+    @keyframes bar { from{height:3px} to{height:14px} }
 
-    /* Overlay styles */
+    /* ── OVERLAY ── */
     .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      backdrop-filter: blur(8px);
-      background-color: rgba(0, 0, 0, 0.4);
-      z-index: 9999;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      display: none; /* Hidden by default */
+      position:fixed; inset:0; backdrop-filter:blur(14px);
+      background:rgba(0,0,0,0.6); z-index:9999;
+      display:none; justify-content:center; align-items:center;
     }
-
+    .overlay.visible { display:flex; }
     .notification {
-      background-color: white;
-      padding: 16px 24px;
-      border-radius: 10px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-      font-size: 16px;
-      font-weight: bold;
-      text-align: center;
-      color: #e91e63;
-      font-family: 'Poppins', sans-serif;
-      max-width: 300px;
-      width: 90%;
+      background:rgba(233,30,99,0.1);
+      border:1px solid rgba(255,128,171,0.3); backdrop-filter:blur(16px);
+      padding:28px 30px; border-radius:20px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.4);
+      font-size:15px; font-weight:500; text-align:center;
+      color:#fff; font-family:'DM Sans',sans-serif;
+      max-width:300px; width:90%; line-height:1.65;
     }
+    .notification .notif-icon { font-size:28px; margin-bottom:10px; }
   </style>
 </head>
 <body>
-  <div class="content">
-    <div class="profile-wrapper">
-      <img id="profileImg" src="https://i.ibb.co/Gvcw26C8/pp.jpg" alt="Profile" class="profile-img" />
+
+  <div class="bg">
+    <div class="orb1"></div>
+    <div class="orb2"></div>
+    <div class="orb3"></div>
+  </div>
+  <div class="noise"></div>
+
+  <div class="page">
+
+    <div class="header">
+      <div class="avatar-wrap" id="avatarWrap" title="Tap untuk play/pause musik">
+        <div class="avatar-ring"></div>
+        <div class="avatar-gap"></div>
+        <img class="avatar-img" id="profileImg" src="https://i.ibb.co/Gvcw26C8/pp.jpg" alt="MPM Nganjuk"/>
+      </div>
+
+      <div class="brand-name">MPM <span>Nganjuk</span></div>
+      <div class="tagline">Wong tulus mesti motore honda</div>
+      <div class="badge"><span class="dot"></span>Marla Kartika</div>
     </div>
-    <h2>MPM NGANJUK</h2>
-    <div class="tagline">Wong tulus mesti motore honda</div>
 
-    <a href="https://www.google.com/maps/place/MPM+Motor+Nganjuk-+AHASS+12696,+Jl.+Raya+Kediri+-+Nganjuk+No.48-50,+Ngelan,+Loceret,+Nganjuk+Regency,+East+Java+64471/@-7.6457924,111.8928116,15z/data=!4m6!3m5!1s0x2e784c8555bb8de5:0x80832de000c86646!8m2!3d-7.6457924!4d111.8928116!16s%2Fg%2F11b807gctb" target="_blank" class="button">
-      <img src="https://cdn-icons-png.flaticon.com/512/535/535239.png" alt="Maps" />
-      Lokasi
-    </a>
+    <div class="links">
 
-    <a href="https://www.instagram.com/marla_mpmnganjuk?igsh=MTllcXIzN3VlajVkMw==" target="_blank" class="button">
-      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram" />
-      Instagram
-    </a>
+      <!-- LOKASI -->
+      <a href="https://www.google.com/maps/place/MPM+Motor+Nganjuk-+AHASS+12696,+Jl.+Raya+Kediri+-+Nganjuk+No.48-50,+Ngelan,+Loceret,+Nganjuk+Regency,+East+Java+64471/@-7.6457924,111.8928116,15z/" target="_blank" class="btn btn-maps">
+        <div class="btn-icon">
+          <!-- map pin SVG -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+          </svg>
+        </div>
+        <div class="btn-label">
+          <strong>Lokasi</strong>
+          <span>Temukan kami di Google Maps</span>
+        </div>
+        <svg class="btn-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
 
-    <a href="https://www.tiktok.com/@marla.mpm.nganjuk?_t=ZS-8xZxnCzPX0y&_r=1" target="_blank" class="button">
-      <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok" />
-      TikTok
-    </a>
+      <!-- INSTAGRAM -->
+      <a href="https://www.instagram.com/marla_mpmnganjuk?igsh=MTllcXIzN3VlajVkMw==" target="_blank" class="btn btn-ig">
+        <div class="btn-icon">
+          <!-- instagram SVG -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.336 3.608 1.311.975.975 1.249 2.242 1.311 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.336 2.633-1.311 3.608-.975.975-2.242 1.249-3.608 1.311-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.336-3.608-1.311-.975-.975-1.249-2.242-1.311-3.608C2.175 15.584 2.163 15.204 2.163 12s.012-3.584.07-4.85c.062-1.366.336-2.633 1.311-3.608.975-.975 2.242-1.249 3.608-1.311C8.416 2.175 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.333.014 7.053.072 5.197.157 3.355.673 2.014 2.014.673 3.355.157 5.197.072 7.053.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.085 1.856.601 3.698 1.942 5.039 1.341 1.341 3.183 1.857 5.039 1.942C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 1.856-.085 3.698-.601 5.039-1.942 1.341-1.341 1.857-3.183 1.942-5.039.058-1.28.072-1.689.072-4.948 0-3.259-.014-3.667-.072-4.947-.085-1.857-.601-3.699-1.942-5.04C20.698.673 18.856.157 17 .072 15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+          </svg>
+        </div>
+        <div class="btn-label">
+          <strong>Instagram</strong>
+          <span>@marla_mpmnganjuk</span>
+        </div>
+        <svg class="btn-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
 
-    <a href="https://www.facebook.com/share/15oMhWFrjb/" target="_blank" class="button">
-      <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" />
-      Facebook
-    </a>
+      <!-- TIKTOK -->
+      <a href="https://www.tiktok.com/@marla.mpm.nganjuk?_t=ZS-8xZxnCzPX0y&_r=1" target="_blank" class="btn btn-tiktok">
+        <div class="btn-icon">
+          <!-- tiktok SVG -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.95a8.2 8.2 0 0 0 4.79 1.52V7.02a4.85 4.85 0 0 1-1.02-.33z"/>
+          </svg>
+        </div>
+        <div class="btn-label">
+          <strong>TikTok</strong>
+          <span>@marla.mpm.nganjuk</span>
+        </div>
+        <svg class="btn-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
 
-    <a href="https://wa.link/a6mbow" target="_blank" class="button">
-      <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp" />
-      WhatsApp
-    </a>
+      <!-- FACEBOOK -->
+      <a href="https://www.facebook.com/share/15oMhWFrjb/" target="_blank" class="btn btn-fb">
+        <div class="btn-icon">
+          <!-- facebook SVG -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.514c-1.491 0-1.956.93-1.956 1.884v2.25h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+          </svg>
+        </div>
+        <div class="btn-label">
+          <strong>Facebook</strong>
+          <span>MPM Nganjuk</span>
+        </div>
+        <svg class="btn-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <!-- WHATSAPP -->
+      <a href="https://wa.link/a6mbow" target="_blank" class="btn btn-wa">
+        <div class="btn-icon">
+          <!-- whatsapp SVG -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+          </svg>
+        </div>
+        <div class="btn-label">
+          <strong>WhatsApp</strong>
+          <span>Chat langsung dengan kami</span>
+        </div>
+        <svg class="btn-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+    </div>
+
+    <div class="footer">
+      LinkTree Designed &nbsp;·&nbsp; by
+      <a href="https://www.instagram.com/gedang_goreng41?igsh=MXE0eXRrZ2FjYXM0Nw==" target="_blank">4trays</a>
+    </div>
   </div>
 
-  <div class="footer">
-    Support developers | Copyright 
-    <a href="https://www.instagram.com/gedang_goreng41?igsh=MXE0eXRrZ2FjYXM0Nw==" target="_blank">4trays</a>
+  <!-- Music pill -->
+  <div class="music-bar" id="musicBar">
+    <div class="bars"><span></span><span></span><span></span><span></span></div>
+    Sedang memutar musik
   </div>
 
   <!-- Overlay -->
   <div id="overlay" class="overlay">
     <div class="notification">
-      Server dalam pengembangan, hubungi developer untuk info lebih lengkap
+      <div class="notif-icon">🛠️</div>
+      Website under development, contact the developer for more information
+      <a href="https://www.instagram.com/gedang_goreng41?igsh=MXE0eXRrZ2FjYXM0Nw==" target="_blank">4trays</a>
     </div>
   </div>
 
-  <!-- Audio -->
   <audio id="bgMusic" loop hidden>
     <source src="kicau mania.mp3" type="audio/mpeg">
-    Browser Anda tidak mendukung audio.
   </audio>
 
-  <!-- JavaScript -->
   <script>
-    const profileImg = document.getElementById("profileImg");
-    const bgMusic = document.getElementById("bgMusic");
-    const overlay = document.getElementById("overlay");
+    const avatarWrap = document.getElementById("avatarWrap");
+    const bgMusic    = document.getElementById("bgMusic");
+    const overlay    = document.getElementById("overlay");
+    const musicBar   = document.getElementById("musicBar");
 
-    // Ubah ini ke true/false untuk menampilkan atau menyembunyikan overlay
     const showOverlay = false;
+    if (showOverlay) overlay.classList.add("visible");
 
-    if (showOverlay) {
-      overlay.style.display = "flex";
-    } else {
-      overlay.style.display = "none";
-    }
-
-    profileImg.addEventListener("click", function () {
-      bgMusic.play();
+    let playing = false;
+    avatarWrap.addEventListener("click", () => {
+      if (!playing) {
+        bgMusic.play().then(() => {
+          playing = true;
+          musicBar.classList.add("visible");
+        }).catch(() => {});
+      } else {
+        bgMusic.pause();
+        playing = false;
+        musicBar.classList.remove("visible");
+      }
     });
   </script>
+
 </body>
-</html>
+      </html>
+                        
